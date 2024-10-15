@@ -1,0 +1,3 @@
+C:/Users/dima2/CLionProjects/opt/cmake-build-debug/CMakeFiles/opt.dir
+C:/Users/dima2/CLionProjects/opt/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/dima2/CLionProjects/opt/cmake-build-debug/CMakeFiles/rebuild_cache.dir
