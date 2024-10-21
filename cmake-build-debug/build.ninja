@@ -52,18 +52,21 @@ build cmake_object_order_depends_target_opt: phony || CMakeFiles/opt.dir
 build CMakeFiles/opt.dir/main.cpp.obj: CXX_COMPILER__opt_unscanned_Debug C$:/Users/dima2/CLionProjects/opt/main.cpp || cmake_object_order_depends_target_opt
   DEP_FILE = CMakeFiles\opt.dir\main.cpp.obj.d
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
+  INCLUDES = -IC:/vyz/kurs/PDCurses-3.9/wincon
   OBJECT_DIR = CMakeFiles\opt.dir
   OBJECT_FILE_DIR = CMakeFiles\opt.dir
 
 build CMakeFiles/opt.dir/SQLController.cpp.obj: CXX_COMPILER__opt_unscanned_Debug C$:/Users/dima2/CLionProjects/opt/SQLController.cpp || cmake_object_order_depends_target_opt
   DEP_FILE = CMakeFiles\opt.dir\SQLController.cpp.obj.d
   FLAGS = -g -std=gnu++23 -fdiagnostics-color=always
+  INCLUDES = -IC:/vyz/kurs/PDCurses-3.9/wincon
   OBJECT_DIR = CMakeFiles\opt.dir
   OBJECT_FILE_DIR = CMakeFiles\opt.dir
 
 build CMakeFiles/opt.dir/sqlite3.c.obj: C_COMPILER__opt_unscanned_Debug C$:/Users/dima2/CLionProjects/opt/sqlite3.c || cmake_object_order_depends_target_opt
   DEP_FILE = CMakeFiles\opt.dir\sqlite3.c.obj.d
   FLAGS = -g -fdiagnostics-color=always
+  INCLUDES = -IC:/vyz/kurs/PDCurses-3.9/wincon
   OBJECT_DIR = CMakeFiles\opt.dir
   OBJECT_FILE_DIR = CMakeFiles\opt.dir
 
@@ -75,9 +78,9 @@ build CMakeFiles/opt.dir/sqlite3.c.obj: C_COMPILER__opt_unscanned_Debug C$:/User
 #############################################
 # Link the executable opt.exe
 
-build opt.exe: CXX_EXECUTABLE_LINKER__opt_Debug CMakeFiles/opt.dir/main.cpp.obj CMakeFiles/opt.dir/SQLController.cpp.obj CMakeFiles/opt.dir/sqlite3.c.obj
+build opt.exe: CXX_EXECUTABLE_LINKER__opt_Debug CMakeFiles/opt.dir/main.cpp.obj CMakeFiles/opt.dir/SQLController.cpp.obj CMakeFiles/opt.dir/sqlite3.c.obj | C$:/vyz/kurs/PDCurses-3.9/wincon/*
   FLAGS = -g
-  LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_LIBRARIES = C:/vyz/kurs/PDCurses-3.9/wincon/*  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\opt.dir
   POST_BUILD = cd .
   PRE_LINK = cd .

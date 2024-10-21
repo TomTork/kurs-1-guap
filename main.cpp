@@ -1,13 +1,20 @@
 #include <iostream>
 #include "SQLController.h"
+#include <string>
+#include <pdcwin.h>
 
 using namespace std;
 
 int main() {
+
+    string command;
     SQLController controller;
 
-    // controller.dropAllTables();
-    // controller.insertIntoCouriers("Volkov Oleg", "15-15", "NULL", 5);
-    // controller.getAllCouriers();
+    cout << "Supported command:" << endl << "1.\tAdd - create a new client, order or courier";
+
+    while (true) {
+
+    }
+
     return 0;
 }
