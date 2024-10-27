@@ -1,6 +1,0 @@
-# ninja log v5
-24	860	7512177335905054	CMakeFiles/opt.dir/main.cpp.obj	37b97d335fc390a7
-33	1815	7512177345426504	CMakeFiles/opt.dir/SQLController.cpp.obj	b17766b5a185381c
-15	1415	7506899894822476	CMakeFiles/opt.dir/shell.c.obj	242c42c3b8ee0329
-12	4795	7506899928528395	CMakeFiles/opt.dir/sqlite3.c.obj	23e366e130ebbe3d
-1815	2201	7512177349265832	opt.exe	ed46a4fa821d0195
