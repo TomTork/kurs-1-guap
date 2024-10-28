@@ -1,5 +1,6 @@
 /.vs
 /cmake-build-debug
 /out
+/.idea
 /.idea/dataSources.local.xml
 /.idea/workspace.xml
