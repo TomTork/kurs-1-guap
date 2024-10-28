@@ -128,7 +128,7 @@ int main() {
                     controller.insertIntoClients(_fio, _num, _x, _y);
                     break;
                 case 5: // Add a new order
-                    cout << "Input "
+                    cout << "Input ";
 
                     clients = controller.getClientsWithOrders();
                     cout << "Input id in outputs clients in format: { id - fio }" << endl;
