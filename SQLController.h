@@ -19,11 +19,12 @@ struct Client {
     int id;
     string fio;
     string num;
-    string location;
+    int x;
+    int y;
     vector<Order> orders;
 };
 
-class SQLController {
+class SQLController final {
 private:
     sqlite3 *db = nullptr;
     char *err = nullptr;
@@ -40,15 +41,18 @@ private:
     */
     void createTable();
 public:
-    /**
-     * Создание новой записи Курьера: fio, location, transport, speed
-     */
-    void insertIntoCouriers(const string &, const string &, const string &, const int &);
+    SQLController();
+    ~SQLController();
 
     /**
-    * Создание новой записи Клиента: fio, num, location
+     * Создание новой записи Курьера: fio, x, y, transport, speed
+     */
+    void insertIntoCouriers(const string&, const int&, const int&, const string&, const int &);
+
+    /**
+    * Создание новой записи Клиента: fio, num, x, y
     */
-    void insertIntoClients(const string &, const string &, const string &);
+    void insertIntoClients(const string&, const string&, const int&, const int&);
 
     /**
      * Вывод в консоль таблицы Курьеров
@@ -61,14 +65,18 @@ public:
     void getAllClients();
 
     /**
+     * Вернуть массив клиентов
+     * @return Client[]
+     */
+    vector<Client> getDataClients();
+
+    /**
      * Удалить все данные из таблиц
      */
     void dropAllTables();
 
     vector<Client> getClientsWithOrders();
 
-    SQLController();
-    ~SQLController();
     void closeDB() const;
 };
 

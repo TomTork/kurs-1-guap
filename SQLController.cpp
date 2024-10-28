@@ -9,8 +9,8 @@
 using namespace std;
 
 void SQLController::createTable() {
-    const auto createCouriers = "CREATE TABLE IF NOT EXISTS Couriers(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, location TEXT, transport TEXT, speed INTEGER);";
-    const auto createClients = "CREATE TABLE IF NOT EXISTS Clients(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, num TEXT, location TEXT);";
+    const auto createCouriers = "CREATE TABLE IF NOT EXISTS Couriers(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, x INTEGER, y INTEGER, transport TEXT, speed INTEGER);";
+    const auto createClients = "CREATE TABLE IF NOT EXISTS Clients(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, num TEXT, x INTEGER, y INTEGER);";
     const auto createOrders = "CREATE TABLE IF NOT EXISTS Orders(ID INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, time TEXT, orders TEXT, status BOOLEAN, weight INTEGER, FOREIGN KEY (client_id) REFERENCES Clients (ID) ON DELETE CASCADE);";
     if (this->exit = sqlite3_exec(this->db, createCouriers, 0, 0, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::createTable " << this->err << endl;
@@ -43,8 +43,8 @@ void SQLController::closeDB() const {
     sqlite3_close(this->db);
 }
 
-void SQLController::insertIntoCouriers(const string &fio, const string &location, const string &transport, const int &speed) {
-    const string sql = format(R"(INSERT INTO Couriers(fio, location, transport, speed) VALUES("{}", "{}", "{}", {});)", fio, location, transport, speed);
+void SQLController::insertIntoCouriers(const string &fio, const int& x, const int& y, const string &transport, const int &speed) {
+    const string sql = format(R"(INSERT INTO Couriers(fio, x, y, transport, speed) VALUES("{}", {}, {}, "{}", {});)", fio, x, y, transport, speed);
     this->exit = sqlite3_exec(this->db, sql.c_str(), 0, 0, &this->err);
     if (this->exit != SQLITE_OK) {
         cerr << "ERROR ::insertIntoCouriers " << this->err << endl;
@@ -53,6 +53,7 @@ void SQLController::insertIntoCouriers(const string &fio, const string &location
 }
 
 int SQLController::callback(void* NotUsed, int argc, char** argv, char** azColName) {
+    cout << "-------------------" << endl;
     for (int i = 0; i < argc; i++) {
         cout << azColName[i] << ": " << (argv[i] ? argv[i] : "NULL") << endl;
     }
@@ -96,8 +97,8 @@ void SQLController::getAllClients() {
     }
 }
 
-void SQLController::insertIntoClients(const string &fio, const string &num, const string &location) {
-    const string sql = format(R"(INSERT INTO Clients(fio, num, location) VALUES("{}", "{}", "{}");)", fio, num, location);
+void SQLController::insertIntoClients(const string &fio, const string &num, const int& x, const int& y) {
+    const string sql = format(R"(INSERT INTO Clients(fio, num, x, y) VALUES("{}", "{}", {}, {});)", fio, num, x, y);
     this->exit = sqlite3_exec(this->db, sql.c_str(), 0, 0, &this->err);
     if (this->exit != SQLITE_OK) {
         cerr << "ERROR ::insertIntoClients " << this->err << endl;
@@ -107,7 +108,7 @@ void SQLController::insertIntoClients(const string &fio, const string &num, cons
 
 vector<Client> SQLController::getClientsWithOrders() {
     vector<Client> clients;
-    const string sql = "SELECT Clients.ID, Clients.fio, Clients.num, Clients.location, Orders.ID, Orders.time, Orders.orders, Orders.status, Orders.weight FROM Clients LEFT JOIN Orders ON Clients.ID = Orders.client_id;";
+    const string sql = "SELECT Clients.ID, Clients.fio, Clients.num, Clients.x, Clients.y, Orders.ID, Orders.time, Orders.orders, Orders.status, Orders.weight FROM Clients LEFT JOIN Orders ON Clients.ID = Orders.client_id;";
     this->exit = sqlite3_exec(this->db, sql.c_str(), [](void* data, int argc, char** argv, char** azColName) {
         auto* inClients = static_cast<vector<Client>*>(data);
 
@@ -115,7 +116,8 @@ vector<Client> SQLController::getClientsWithOrders() {
         int clientId = stoi(argv[0]);
         const string fio = argv[1] ? argv[1] : "NULL";
         const string num = argv[2] ? argv[2] : "NULL";
-        const string location = argv[3] ? argv[3] : "NULL";
+        const int x = argv[3] ? stoi(argv[3]) : -1;
+        const int y = argv[4] ? stoi(argv[4]) : -1;
 
         // Проверяем, существует ли клиент в векторе
         auto it = ranges::find_if(*inClients,
@@ -123,18 +125,18 @@ vector<Client> SQLController::getClientsWithOrders() {
 
         // Если клиент не найден, добавляем его
         if (it == inClients->end()) {
-            inClients->emplace_back(Client{ clientId, fio, num, location, {} });
+            inClients->emplace_back(Client{ clientId, fio, num, x, y, {} });
             it = prev(inClients->end()); // Указатель на нового клиента
         }
 
         // Добавляем заказ, если он существует
         if (argv[4]) { // Если заказ существует
             const Order order{
-                stoi(argv[4]),
-                argv[5] ? argv[5] : "",
+                stoi(argv[5]),
                 argv[6] ? argv[6] : "",
-                argv[7] ? string(argv[7]) == "1" : false,
-                argv[8] ? stoi(argv[8]) : 0
+                argv[7] ? argv[7] : "",
+                argv[8] ? string(argv[8]) == "1" : false,
+                argv[9] ? stoi(argv[9]) : 0
             };
             it->orders.push_back(order);
         }
@@ -147,4 +149,8 @@ vector<Client> SQLController::getClientsWithOrders() {
         sqlite3_free(this->err);
     }
     return clients;
+}
+
+vector<Client> SQLController::getDataClients() {
+
 }
