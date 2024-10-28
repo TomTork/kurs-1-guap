@@ -151,6 +151,9 @@ vector<Client> SQLController::getClientsWithOrders() {
     return clients;
 }
 
-vector<Client> SQLController::getDataClients() {
+// Сделать вывод всех клиентов по ID
+vector<SimpleId> SQLController::getDataClients() {
+    vector<SimpleId> clients;
+    const string sql = "SELECT Clients.ID FROM Clients;";
 
 }

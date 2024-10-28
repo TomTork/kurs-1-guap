@@ -24,6 +24,10 @@ struct Client {
     vector<Order> orders;
 };
 
+struct SimpleId {
+    int id;
+};
+
 class SQLController final {
 private:
     sqlite3 *db = nullptr;
@@ -68,7 +72,7 @@ public:
      * Вернуть массив клиентов
      * @return Client[]
      */
-    vector<Client> getDataClients();
+    vector<SimpleId> getDataClients();
 
     /**
      * Удалить все данные из таблиц
