@@ -9,4 +9,6 @@ std::pair<bool, string> checkStringState(const std::string&, bool allowSpace = f
 
 std::pair<bool, string> checkPhoneNumber(const string&);
 
+double distance(const pair<int, int>&, const pair<int, int>&);
+
 #endif //HELPER_H

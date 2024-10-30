@@ -5,23 +5,25 @@
 #include <conio.h>
 #include "SQLController.h"
 #include "helper.h"
+#include "AlgorithmDijkstras.h"
 
 using namespace std;
 
 int main() {
     SQLController controller;
     vector<Client> clients;
+    vector<string> commands;
     vector<SimpleId> clientsIds;
     SimpleId clientId;
     string command, _num, _fio, _location, _transport, _speed, orders;
     int _x, _y, finalSpeed, weight;
-    int clientSelected = 0;
+    bool choiceOrder;
     const vector<string> options = {
         "Output all couriers", "Output all clients", "Output all orders",
         "Add a new courier", "Add a new client", "Add a new order",
         "Optimize", "Exit"
     };
-    unsigned long long selected = 0;
+    unsigned long long selected = 0, clientSelected = 0;
 
     while (true) {
         system("cls");
@@ -51,7 +53,7 @@ int main() {
                         controller.getAllCouriers();
                         cout << endl;
                     } catch (exception& e) {
-                        cerr << "Table is empty!" << endl;
+                        cerr << "Table is empty! " << e.what() << endl;
                     }
                     break;
                 case 1: // Output all clients
@@ -60,14 +62,14 @@ int main() {
                         controller.getAllClients();
                         cout << endl;
                     } catch (exception& e) {
-                        cerr << "Table is empty!" << endl;
+                        cerr << "Table is empty! " << e.what() << endl;
                     }
                     break;
                 case 2: // Output all orders
                     try {
-                        cout << endl;
                         for (const auto& [id, fio, num, x, y, orders] : controller.getClientsWithOrders()) {
-                            cout << "For Client " << id << "-> FIO: " << fio << " | Phone number: " << num << " | X: " << x << " | Y: " << y << endl;
+                            cout << endl;
+                            cout << "For Client " << id << " -> FIO: " << fio << " | Phone number: " << num << " | X: " << x << " | Y: " << y << endl;
                             cout << "Orders:" << endl;
                             for (const auto& [id, orders, status, weight] : orders) {
                                 cout << "ID: " << id << " | Order(s): " << orders << " | Status: " << status << " | Weight: " << weight << endl;
@@ -75,12 +77,12 @@ int main() {
                         }
                         cout << endl;
                     } catch (exception& e) {
-                        cerr << "Table is empty!" << endl;
+                        cerr << "Table is empty! " << e.what() << endl;
                     }
                     break;
                 case 3: // Add a new courier
                     cout << "---ADD A NEW COURIER---" << endl;
-                    cout << "Input FIO:\t";
+                    cout << "Input FIO: ";
                     while (true) {
                         getline(cin, _fio);
                         if (const auto [fst, snd] = checkStringState(_fio, true); fst) {
@@ -89,7 +91,7 @@ int main() {
                         }
                         cerr << "Error in input, please try again!" << endl;
                     }
-                    cout << "Input location in format (x, y):\t";
+                    cout << "Input location in format (x, y): ";
                     while (true) {
                         getline(cin, _location);
                         const tuple<bool, int, int> cLocation = checkLocation(_location);
@@ -100,7 +102,7 @@ int main() {
                         }
                         if (!get<0>(cLocation)) cerr << "Error in input, please try again!" << endl;
                     }
-                    cout << "Input transport:\t";
+                    cout << "Input transport: ";
                     while (true) {
                         getline(cin, _transport);
                         if (const auto [fst, snd] = checkStringState(_transport, true); fst) {
@@ -109,7 +111,7 @@ int main() {
                         }
                         cerr << "Error in input, please try again!" << endl;
                     }
-                    cout << "Input speed:\t";
+                    cout << "Input speed: ";
                     while (true) {
                         try {
                             getline(cin, _speed);
@@ -123,7 +125,7 @@ int main() {
                     break;
                 case 4: // Add a new client
                     cout << "---ADD A NEW CLIENT---" << endl;
-                    cout << "Input FIO:\t";
+                    cout << "Input FIO: ";
                     while (true) {
                         getline(cin, _fio);
                         if (const auto [fst, snd] = checkStringState(_fio, true); fst) {
@@ -132,7 +134,7 @@ int main() {
                         }
                         cerr << "Error in input, please try again!" << endl;
                     }
-                    cout << "Input phone number:\t";
+                    cout << "Input phone number: ";
                     while (true) {
                         getline(cin, _num);
                         if (const auto [fst, snd] = checkPhoneNumber(_num); fst) {
@@ -141,7 +143,7 @@ int main() {
                         }
                         cerr << "Error in input, please try again!" << endl;
                     }
-                    cout << "Input location in format (x, y):\t";
+                    cout << "Input location in format (x, y): ";
                     while (true) {
                         getline(cin, _location);
                         const tuple<bool, int, int> cLocation = checkLocation(_location);
@@ -155,6 +157,7 @@ int main() {
                     controller.insertIntoClients(_fio, _num, _x, _y);
                     break;
                 case 5: // Add a new order
+                    choiceOrder = true;
                     while (true) {
                         clientsIds = controller.getDataClients();
                         system("cls");
@@ -181,11 +184,12 @@ int main() {
 
                         const int key = _getch();
                         if (key == 72) {
-                            clientSelected = (clientSelected > 0) ? clientSelected - 1 : clientsIds.size();
+                            clientSelected = clientSelected > 0 ? clientSelected - 1 : clientsIds.size();
                         } else if (key == 80) {
                             clientSelected = (clientSelected + 1) % (clientsIds.size() + 1);
                         } else if (key == 13) {
                             if (clientSelected == clientsIds.size()) {
+                                choiceOrder = false;
                                 break;
                             }
                             clientId = clientsIds[clientSelected];
@@ -193,21 +197,28 @@ int main() {
                             break;
                         }
                     }
-                    cout << "Input your order(s):\t";
-                    cin >> orders;
-                    cout << "Input weight of order(s):\t";
-                    while (true) {
-                        try {
-                            cin >> weight;
-                            break;
-                        } catch (exception& e) {
-                            cerr << "A non-integer number was entered. Error: " << e.what() << endl;
+                    if (choiceOrder) {
+                        cout << "Input your order(s): ";
+                        cin >> orders;
+                        cout << "Input weight of order(s): ";
+                        while (true) {
+                            try {
+                                cin >> weight;
+                                break;
+                            } catch (exception& e) {
+                                cerr << "A non-integer number was entered. Error: " << e.what() << endl;
+                            }
                         }
+                        controller.insertOrder(clientId.id, orders, false, weight);
                     }
-                    controller.insertOrder(clientId.id, orders, false, weight);
                     break;
                 case 6: // Optimize
-                    cout << "opt" << endl;
+                    cout << endl;
+                    commands = AlgorithmDijkstras(controller.getClientsWithOrders(), controller.getDataCouriers()).process(controller);
+                    for (const auto& com : commands) {
+                        cout << com << endl;
+                    }
+                    cout << endl;
                     break;
                 default:
                     break;

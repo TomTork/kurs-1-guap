@@ -1,5 +1,5 @@
 #include "SQLController.h"
-#include <stdio.h>
+#include <cstdio>
 #include "sqlite3.h"
 #include <string>
 #include <format>
@@ -12,15 +12,15 @@ void SQLController::createTable() {
     const auto createCouriers = "CREATE TABLE IF NOT EXISTS Couriers(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, x INTEGER, y INTEGER, transport TEXT, speed INTEGER);";
     const auto createClients = "CREATE TABLE IF NOT EXISTS Clients(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, num TEXT, x INTEGER, y INTEGER);";
     const auto createOrders = "CREATE TABLE IF NOT EXISTS Orders(ID INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, orders TEXT, status BOOLEAN, weight INTEGER, FOREIGN KEY (client_id) REFERENCES Clients (ID) ON DELETE CASCADE);";
-    if (this->exit = sqlite3_exec(this->db, createCouriers, 0, 0, &this->err); this->exit != SQLITE_OK) {
+    if (this->exit = sqlite3_exec(this->db, createCouriers, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::createTable " << this->err << endl;
         sqlite3_free(this->err);
     }
-    if (this->exit = sqlite3_exec(this->db, createClients, 0, 0, &this->err); this->exit != SQLITE_OK) {
+    if (this->exit = sqlite3_exec(this->db, createClients, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::createTable " << this->err << endl;
         sqlite3_free(this->err);
     }
-    if (this->exit = sqlite3_exec(this->db, createOrders, 0, 0, &this->err); this->exit != SQLITE_OK) {
+    if (this->exit = sqlite3_exec(this->db, createOrders, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::createTable " << this->err << endl;
         sqlite3_free(this->err);
     }
@@ -30,7 +30,7 @@ SQLController::SQLController() {
     if (sqlite3_open("C:/Users/dima2/CLionProjects/opt/database.sqlite", &this->db)) {
         fprintf(stderr, "ERROR: %s\n", sqlite3_errmsg(db));
     }
-    sqlite3_exec(this->db, "PRAGMA foreign_keys = ON;", 0, 0, &this->err);
+    sqlite3_exec(this->db, "PRAGMA foreign_keys = ON;", nullptr, nullptr, &this->err);
     createTable();
 }
 
@@ -45,7 +45,7 @@ void SQLController::closeDB() const {
 
 void SQLController::insertIntoCouriers(const string &fio, const int& x, const int& y, const string &transport, const int &speed) {
     const string sql = format(R"(INSERT INTO Couriers(fio, x, y, transport, speed) VALUES("{}", {}, {}, "{}", {});)", fio, x, y, transport, speed);
-    this->exit = sqlite3_exec(this->db, sql.c_str(), 0, 0, &this->err);
+    this->exit = sqlite3_exec(this->db, sql.c_str(), nullptr, nullptr, &this->err);
     if (this->exit != SQLITE_OK) {
         cerr << "ERROR ::insertIntoCouriers " << this->err << endl;
         sqlite3_free(this->err);
@@ -64,7 +64,7 @@ int SQLController::callback(void* NotUsed, int argc, char** argv, char** azColNa
 
 void SQLController::getAllCouriers() {
     const string sql = "SELECT * FROM Couriers;";
-    this->exit = sqlite3_exec(this->db, sql.c_str(), callback, 0, &this->err);
+    this->exit = sqlite3_exec(this->db, sql.c_str(), callback, nullptr, &this->err);
     if (this->exit != SQLITE_OK) {
         cerr << "ERROR ::getAllCouriers " << this->err << endl;
         sqlite3_free(this->err);
@@ -73,17 +73,17 @@ void SQLController::getAllCouriers() {
 
 void SQLController::dropAllTables() {
     const auto deleteCouriers = "DROP TABLE Couriers;";
-    if (this->exit = sqlite3_exec(this->db, deleteCouriers, 0, 0, &this->err); this->exit != SQLITE_OK) {
+    if (this->exit = sqlite3_exec(this->db, deleteCouriers, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::dropAllTables " << this->err << endl;
         sqlite3_free(this->err);
     }
     const auto deleteOrders = "DROP TABLE Orders;";
-    if (this->exit = sqlite3_exec(this->db, deleteOrders, 0, 0, &this->err); this->exit != SQLITE_OK) {
+    if (this->exit = sqlite3_exec(this->db, deleteOrders, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::dropAllTables " << this->err << endl;
         sqlite3_free(this->err);
     }
     const auto deleteClients = "DROP TABLE Clients;";
-    if (this->exit = sqlite3_exec(this->db, deleteClients, 0, 0, &this->err); this->exit != SQLITE_OK) {
+    if (this->exit = sqlite3_exec(this->db, deleteClients, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::dropAllTables " << this->err << endl;
         sqlite3_free(this->err);
     }
@@ -91,7 +91,7 @@ void SQLController::dropAllTables() {
 
 void SQLController::getAllClients() {
     const string sql = "SELECT * FROM Clients;";
-    this->exit = sqlite3_exec(this->db, sql.c_str(), callback, 0, &this->err);
+    this->exit = sqlite3_exec(this->db, sql.c_str(), callback, nullptr, &this->err);
     if (this->exit != SQLITE_OK) {
         cerr << "ERROR ::getAllClients " << this->err << endl;
         sqlite3_free(this->err);
@@ -100,7 +100,7 @@ void SQLController::getAllClients() {
 
 void SQLController::insertIntoClients(const string &fio, const string &num, const int& x, const int& y) {
     const string sql = format(R"(INSERT INTO Clients(fio, num, x, y) VALUES("{}", "{}", {}, {});)", fio, num, x, y);
-    this->exit = sqlite3_exec(this->db, sql.c_str(), 0, 0, &this->err);
+    this->exit = sqlite3_exec(this->db, sql.c_str(), nullptr, nullptr, &this->err);
     if (this->exit != SQLITE_OK) {
         cerr << "ERROR ::insertIntoClients " << this->err << endl;
         sqlite3_free(this->err);
@@ -195,4 +195,49 @@ void SQLController::insertOrder(const int& clientId, const string& orders, const
         cerr << "Error executing statement: " << sqlite3_errmsg(this->db) << endl;
     }
     sqlite3_finalize(stmt);
+}
+
+void SQLController::updateCoordsCourier(const int& id, const int& x, const int& y) {
+    const string sql = "UPDATE Couriers SET x=" + to_string(x) + ", y=" + to_string(y) + " WHERE id=" + to_string(id) + ";";
+    this->exit = sqlite3_exec(this->db, sql.c_str(), nullptr, nullptr, &this->err);
+    if (this->exit != SQLITE_OK) {
+        cerr << "ERROR ::updateCoordsCourier: " << this->err << endl;
+        sqlite3_free(this->err);
+    }
+}
+
+void SQLController::updateStatusOrders(const int& id, const bool& status) {
+    const string sql = "UPDATE Orders SET status=" + to_string(status) + " WHERE id=" + to_string(id)  + ";";
+    this->exit = sqlite3_exec(this->db, sql.c_str(), nullptr, nullptr, &this->err);
+    if (this->exit != SQLITE_OK) {
+        cerr << "ERROR ::updateStatusOrders: " << this->err << endl;
+        sqlite3_free(this->err);
+    }
+}
+
+int callback3(void* data, int argc, char** argv, char** azColName) {
+    auto* couriers = static_cast<vector<Courier>*>(data);
+
+    Courier courier;
+    courier.id = argv[0] ? stoi(argv[0]) : 0;
+    courier.fio = argv[1] ? argv[1] : "NULL";
+    courier.x = argv[2] ? stoi(argv[2]) : 0;
+    courier.y = argv[3] ? stoi(argv[3]) : 0;
+    courier.transport = argv[4] ? argv[4] : "NULL";
+    courier.speed = argv[5] ? stoi(argv[5]) : 0;
+
+    couriers->push_back(courier);
+    return 0;
+}
+
+vector<Courier> SQLController::getDataCouriers() {
+    vector<Courier> couriers;
+    const string sql = "SELECT id, fio, x, y, transport, speed FROM Couriers;";
+
+    this->exit = sqlite3_exec(this->db, sql.c_str(), callback3, &couriers, &this->err);
+    if (this->exit != SQLITE_OK) {
+        cerr << "ERROR ::getDataCouriers: " << this->err << endl;
+        sqlite3_free(this->err);
+    }
+    return couriers;
 }

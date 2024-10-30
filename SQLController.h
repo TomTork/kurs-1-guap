@@ -1,6 +1,6 @@
 #ifndef SQLCONTROLLER_H
 #define SQLCONTROLLER_H
-#include <stdio.h>
+#include <cstdio>
 #include "sqlite3.h"
 #include <string>
 #include <vector>
@@ -21,6 +21,15 @@ struct Client {
     int x;
     int y;
     vector<Order> orders;
+};
+
+struct Courier {
+    int id;
+    string fio;
+    int x;
+    int y;
+    string transport;
+    int speed;
 };
 
 struct SimpleId {
@@ -54,9 +63,20 @@ public:
     void insertIntoCouriers(const string&, const int&, const int&, const string&, const int &);
 
     /**
+     * Обновление координат Курьера: id, x, y
+     */
+    void updateCoordsCourier(const int&, const int&, const int&);
+
+    /**
     * Создание новой записи Клиента: fio, num, x, y
     */
     void insertIntoClients(const string&, const string&, const int&, const int&);
+
+    /**
+     * Обновить статус Заказа: id, status
+     * @deprecated Метод не используется
+     */
+    void updateStatusOrders(const int&, const bool&);
 
     /**
      * Создание новой записи Заказа: client_id, orders, status, weight
@@ -78,6 +98,12 @@ public:
      * @return Client[]
      */
     vector<SimpleId> getDataClients();
+
+    /**
+     * Вернуть массив Курьеров
+     * @return Courier[]
+     */
+    vector<Courier> getDataCouriers();
 
     /**
      * Удалить все данные из таблиц

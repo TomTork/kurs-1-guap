@@ -1,3 +1,4 @@
+#include <cmath>
 #include <iostream>
 #include <string>
 
@@ -44,4 +45,10 @@ pair<bool, string> checkPhoneNumber(const string &num) {
         return pair { true, num };
     }
     return pair { false, "" };
+}
+
+double distance(const pair<int, int>& courier, const pair<int, int>& client) {
+    const int _x = abs(courier.first - client.first);
+    const int _y = abs(courier.second - client.second);
+    return sqrt(_x * _x + _y * _y);
 }
