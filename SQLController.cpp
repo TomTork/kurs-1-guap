@@ -11,7 +11,7 @@ using namespace std;
 void SQLController::createTable() {
     const auto createCouriers = "CREATE TABLE IF NOT EXISTS Couriers(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, x INTEGER, y INTEGER, transport TEXT, speed INTEGER);";
     const auto createClients = "CREATE TABLE IF NOT EXISTS Clients(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, num TEXT, x INTEGER, y INTEGER);";
-    const auto createOrders = "CREATE TABLE IF NOT EXISTS Orders(ID INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, time TEXT, orders TEXT, status BOOLEAN, weight INTEGER, FOREIGN KEY (client_id) REFERENCES Clients (ID) ON DELETE CASCADE);";
+    const auto createOrders = "CREATE TABLE IF NOT EXISTS Orders(ID INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, orders TEXT, status BOOLEAN, weight INTEGER, FOREIGN KEY (client_id) REFERENCES Clients (ID) ON DELETE CASCADE);";
     if (this->exit = sqlite3_exec(this->db, createCouriers, 0, 0, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::createTable " << this->err << endl;
         sqlite3_free(this->err);
@@ -58,6 +58,7 @@ int SQLController::callback(void* NotUsed, int argc, char** argv, char** azColNa
         cout << azColName[i] << ": " << (argv[i] ? argv[i] : "NULL") << endl;
     }
     cout << "-------------------" << endl;
+    cout << endl;
     return 0;
 }
 
@@ -108,12 +109,12 @@ void SQLController::insertIntoClients(const string &fio, const string &num, cons
 
 vector<Client> SQLController::getClientsWithOrders() {
     vector<Client> clients;
-    const string sql = "SELECT Clients.ID, Clients.fio, Clients.num, Clients.x, Clients.y, Orders.ID, Orders.time, Orders.orders, Orders.status, Orders.weight FROM Clients LEFT JOIN Orders ON Clients.ID = Orders.client_id;";
+    const string sql = "SELECT Clients.ID, Clients.fio, Clients.num, Clients.x, Clients.y, Orders.ID, Orders.orders, Orders.status, Orders.weight FROM Clients LEFT JOIN Orders ON Clients.ID = Orders.client_id;";
     this->exit = sqlite3_exec(this->db, sql.c_str(), [](void* data, int argc, char** argv, char** azColName) {
         auto* inClients = static_cast<vector<Client>*>(data);
 
         // Получаем информацию о клиенте
-        int clientId = stoi(argv[0]);
+        const int clientId = stoi(argv[0]);
         const string fio = argv[1] ? argv[1] : "NULL";
         const string num = argv[2] ? argv[2] : "NULL";
         const int x = argv[3] ? stoi(argv[3]) : -1;
@@ -134,9 +135,8 @@ vector<Client> SQLController::getClientsWithOrders() {
             const Order order{
                 stoi(argv[5]),
                 argv[6] ? argv[6] : "",
-                argv[7] ? argv[7] : "",
-                argv[8] ? string(argv[8]) == "1" : false,
-                argv[9] ? stoi(argv[9]) : 0
+                argv[7] ? string(argv[7]) == "1" : false,
+                argv[8] ? stoi(argv[8]) : 0
             };
             it->orders.push_back(order);
         }
@@ -151,9 +151,48 @@ vector<Client> SQLController::getClientsWithOrders() {
     return clients;
 }
 
-// Сделать вывод всех клиентов по ID
+
+int callback2(void* data, int argc, char** argv, char** azColName) {
+    auto* clients = static_cast<vector<SimpleId>*>(data);
+
+    SimpleId client;
+    client.id = argv[0] ? stoi(argv[0]) : 0;
+    client.fio = argv[1] ? argv[1] : "NULL";
+
+    clients->push_back(client);
+    return 0;
+}
+
 vector<SimpleId> SQLController::getDataClients() {
     vector<SimpleId> clients;
-    const string sql = "SELECT Clients.ID FROM Clients;";
+    const string sql = "SELECT ID, fio FROM Clients;";
 
+    this->exit = sqlite3_exec(this->db, sql.c_str(), callback2, &clients, &this->err);
+    if (this->exit != SQLITE_OK) {
+        cerr << "ERROR ::getDataClients " << this->err << endl;
+        sqlite3_free(this->err);
+    }
+    return clients;
+}
+
+void SQLController::insertOrder(const int& clientId, const string& orders, const bool& status, const int& weight) {
+    const string sql = "INSERT INTO Orders (client_id, orders, status, weight) VALUES (?, ?, ?, ?);";
+    sqlite3_stmt* stmt;
+
+    this->exit = sqlite3_prepare_v2(this->db, sql.c_str(), -1, &stmt, nullptr);
+    if (this->exit != SQLITE_OK) {
+        cerr << "Error preparing statement: " << sqlite3_errmsg(this->db) << endl;
+        return;
+    }
+
+    sqlite3_bind_int(stmt, 1, clientId);
+    sqlite3_bind_text(stmt, 2, orders.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 3, status ? 1 : 0);
+    sqlite3_bind_int(stmt, 4, weight);
+
+    this->exit = sqlite3_step(stmt);
+    if (this->exit != SQLITE_DONE) {
+        cerr << "Error executing statement: " << sqlite3_errmsg(this->db) << endl;
+    }
+    sqlite3_finalize(stmt);
 }

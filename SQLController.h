@@ -9,7 +9,6 @@ using namespace std;
 
 struct Order {
     int id;
-    string time;
     string orders;
     bool status;
     int weight;
@@ -26,6 +25,7 @@ struct Client {
 
 struct SimpleId {
     int id;
+    string fio;
 };
 
 class SQLController final {
@@ -57,6 +57,11 @@ public:
     * Создание новой записи Клиента: fio, num, x, y
     */
     void insertIntoClients(const string&, const string&, const int&, const int&);
+
+    /**
+     * Создание новой записи Заказа: client_id, orders, status, weight
+     */
+    void insertOrder(const int&, const string&, const bool&, const int&);
 
     /**
      * Вывод в консоль таблицы Курьеров
