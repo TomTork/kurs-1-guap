@@ -14,16 +14,18 @@ int main() {
     vector<Client> clients;
     vector<string> commands;
     vector<SimpleId> clientsIds;
+    vector<Warehouse> warehouses;
     SimpleId clientId;
+    Warehouse warehouse;
     string command, _num, _fio, _location, _transport, _speed, orders;
     int _x, _y, finalSpeed, weight;
-    bool choiceOrder;
+    bool choiceOrder, choiceWarehouse;
     const vector<string> options = {
         "Output all couriers", "Output all clients", "Output all orders",
         "Add a new courier", "Add a new client", "Add a new order",
         "Optimize", "Exit"
     };
-    unsigned long long selected = 0, clientSelected = 0;
+    unsigned long long selected = 0, clientSelected = 0, warehouseSelected = 0;
 
     while (true) {
         system("cls");
@@ -91,17 +93,48 @@ int main() {
                         }
                         cerr << "Error in input, please try again!" << endl;
                     }
-                    cout << "Input location in format (x, y): ";
+                    choiceWarehouse = true;
                     while (true) {
-                        getline(cin, _location);
-                        const tuple<bool, int, int> cLocation = checkLocation(_location);
-                        if (_location.contains(" ") && get<0>(cLocation)) {
-                            _x = get<1>(cLocation);
-                            _y = get<2>(cLocation);
+                        warehouses = controller.getDataWarehouses();
+                        system("cls");
+                        cout << "---LINK Courier and Warehouse---" << endl;
+                        cout << "Use arrow keys to select a warehouse, press Enter to confirm, or select 'Exit' to go back:\n";
+                        for (size_t i = 0; i < warehouses.size() + 1; ++i) {
+                            if (i == warehouseSelected) {
+                                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+                                if (i == warehouses.size()) {
+                                    cout << "Exit <-\n";
+                                } else {
+                                    cout << "|ID:\t" << warehouses[i].id << " | NAME: " << warehouses[i].name
+                                    << "\t | X:\t" << warehouses[i].x << "\t | Y:\t" << warehouses[i].y << " <-\n";
+                                }
+                            } else {
+                                SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                                if (i == warehouses.size()) {
+                                    cout << "Exit\n";
+                                } else {
+                                    cout << "|ID:\t" << warehouses[i].id << " | NAME: " << warehouses[i].name
+                                    << "\t | X:\t" << warehouses[i].x << "\t | Y:\t" << warehouses[i].y << "\n";
+                                }
+                            }
+                        }
+                        SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+                        if (const int _key = _getch(); _key == 72) {
+                            warehouseSelected = warehouseSelected > 0 ? warehouseSelected - 1 : warehouses.size();
+                        } else if (_key == 80) {
+                            warehouseSelected = (warehouseSelected + 1) % (warehouses.size() + 1);
+                        } else if (_key == 13) {
+                            if (warehouseSelected == warehouses.size()) {
+                                choiceWarehouse = false;
+                                break;
+                            }
+                            warehouse = warehouses[warehouseSelected];
+                            cout << "Selected warehouse ID: " << warehouses[warehouseSelected].id << endl;
                             break;
                         }
-                        if (!get<0>(cLocation)) cerr << "Error in input, please try again!" << endl;
                     }
+                    if (!choiceWarehouse) break;
                     cout << "Input transport: ";
                     while (true) {
                         getline(cin, _transport);
@@ -121,7 +154,7 @@ int main() {
                             cerr << "Error: " << e.what() << endl;
                         }
                     }
-                    controller.insertIntoCouriers(_fio, _x, _y, _transport, finalSpeed);
+                    controller.insertIntoCouriers(_fio, warehouse.x, warehouse.y, _transport, finalSpeed);
                     break;
                 case 4: // Add a new client
                     cout << "---ADD A NEW CLIENT---" << endl;

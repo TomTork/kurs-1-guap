@@ -12,6 +12,11 @@ void SQLController::createTable() {
     const auto createCouriers = "CREATE TABLE IF NOT EXISTS Couriers(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, x INTEGER, y INTEGER, transport TEXT, speed INTEGER);";
     const auto createClients = "CREATE TABLE IF NOT EXISTS Clients(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, num TEXT, x INTEGER, y INTEGER);";
     const auto createOrders = "CREATE TABLE IF NOT EXISTS Orders(ID INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, orders TEXT, status BOOLEAN, weight INTEGER, FOREIGN KEY (client_id) REFERENCES Clients (ID) ON DELETE CASCADE);";
+    const auto createWarehouses = "CREATE TABLE IF NOT EXISTS Warehouses(ID INTEGER PRIMARY KEY, name TEXT, x INTEGER, y INTEGER);"
+                                  "INSERT INTO Warehouses VALUES(1, \"The warehouse of the Moskovsky district\", 10, 10);"
+                                  "INSERT INTO Warehouses VALUES(2, \"The warehouse of the Kyrortny district\", 20, 20);"
+                                  "INSERT INTO Warehouses VALUES(3, \"The warehouse of the Vyborgsky district\", 12, 7);"
+                                  "INSERT INTO Warehouses VALUES(4, \"The warehouse of the Kirovsky district\", 5, 2);";
     if (this->exit = sqlite3_exec(this->db, createCouriers, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::createTable " << this->err << endl;
         sqlite3_free(this->err);
@@ -21,6 +26,10 @@ void SQLController::createTable() {
         sqlite3_free(this->err);
     }
     if (this->exit = sqlite3_exec(this->db, createOrders, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
+        cerr << "ERROR ::createTable " << this->err << endl;
+        sqlite3_free(this->err);
+    }
+    if (this->exit = sqlite3_exec(this->db, createWarehouses, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::createTable " << this->err << endl;
         sqlite3_free(this->err);
     }
@@ -240,4 +249,29 @@ vector<Courier> SQLController::getDataCouriers() {
         sqlite3_free(this->err);
     }
     return couriers;
+}
+
+int callback4(void* data, int argc, char** argv, char** azColName) {
+    auto* warehouses = static_cast<vector<Warehouse>*>(data);
+
+    Warehouse warehouse;
+    warehouse.id = argv[0] ? stoi(argv[0]) : 0;
+    warehouse.name = argv[1] ? argv[1] : "";
+    warehouse.x = argv[2] ? stoi(argv[2]) : -1;
+    warehouse.y = argv[3] ? stoi(argv[3]) : -1;
+
+    warehouses->push_back(warehouse);
+    return 0;
+}
+
+vector<Warehouse> SQLController::getDataWarehouses() {
+    vector<Warehouse> warehouses;
+    const string sql = "SELECT id, name, x, y FROM Warehouses;";
+
+    this->exit = sqlite3_exec(this->db, sql.c_str(), callback4, &warehouses, &this->err);
+    if (this->exit != SQLITE_OK) {
+        cerr << "ERROR ::getDataWarehouses: " << this->err << endl;
+        sqlite3_free(this->err);
+    }
+    return warehouses;
 }

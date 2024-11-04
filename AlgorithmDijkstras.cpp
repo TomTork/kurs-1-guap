@@ -6,87 +6,56 @@
 
 using namespace std;
 
-vector<string> AlgorithmDijkstras::process(SQLController& controller) {
-    vector<string> commands;
-    vector<Processing> timeArrival;
-    Processing inTimeArrival{};
-    for (auto& courier : this->_couriers) {
-        for (auto& client : this->_clients) {
+vector<Processing> AlgorithmDijkstras::calculate(const vector<Courier>& couriers, const vector<Client>& clients) {
+    vector<Processing> _timeArrival;
+    for (auto& courier : couriers) {
+        for (auto& client : clients) {
             int weightSum = 0;
-            for (const auto& [_id, _orders, _status, _weight] : client.orders) {
-                if (!_status) {
-                    weightSum += _weight;
-                }
+            for (const auto &[id, orders, status, weight] : client.orders) {
+                weightSum += weight;
             }
             if (weightSum != 0) {
+                Processing inTimeArrival;
                 const double time = (static_cast<double>(weightSum) * 100) *
                               (distance(pair{courier.x, courier.y}, pair{client.x, client.y}) / courier.speed);
-                inTimeArrival.courier = &courier;
-                inTimeArrival.client = &client;
+                inTimeArrival.courier = courier;
+                inTimeArrival.client = client;
                 inTimeArrival.time = time;
+                inTimeArrival.courier.localTime = time;
 
-                timeArrival.push_back(inTimeArrival);
-            }
+                _timeArrival.push_back(inTimeArrival);
+            } else throw WeightIsNull();
         }
     }
-    ranges::sort(timeArrival, [](const Processing& a, const Processing& b) {
-        return a.time < b.time;
-    });
+    return _timeArrival;
+}
 
-    cout << "---LOG---" << endl;
-    for (const auto& [courier, client, time, localTime] : timeArrival) {
-        cout << courier->id << " " << courier->fio << " " << courier->x << " " << courier->y << "\t" << client->id << " " << client->fio << "\t" << time << endl;
-    }
+string AlgorithmDijkstras::generateCommand(const Courier& courier, const Client& client) {
+    return "Courier by ID: " + to_string(courier.id) + " (" + courier.fio + ") must to go to Client by ID: "
+    + to_string(client.id) + " (" + client.fio + ") with Time: " + to_string(courier.finalTime);
+}
 
-    double t = 0;
-    while (true) {
-        if (!timeArrival.empty()) {
-            for (int i = 0; i < timeArrival.size(); i++) {
-                if (timeArrival[i].localTime >= timeArrival[i].time) {
-                    cout << "size: " << timeArrival.size() << endl;
-                    cout << "Courier: " << timeArrival[i].courier->fio << " Client: " << timeArrival[i].client->fio << endl;
-                    commands.push_back("Courier ID: " + to_string(timeArrival[i].courier->id) + " (" + timeArrival[i].courier->fio + ")" +
-                    " must to go client ID: " + to_string(timeArrival[i].client->id) + " (" + timeArrival[i].client->fio + ")");
-                    timeArrival[i].courier->x = timeArrival[i].client->x;
-                    timeArrival[i].courier->y = timeArrival[i].client->y;
-                    // controller.updateCoordsCourier(courier.id, client.x, client.y);
-                    erase_if(timeArrival, [&](const Processing &p) { return p.client->id == timeArrival[i].client->id; });
-                    break;
-                }
-                timeArrival[i].localTime = t;
-            }
-            // for (auto &[courier, client, time, localTime] : timeArrival) {
-            //     cout << courier.id << " " << courier.x << " " << courier.y << endl;
-            //     if (localTime >= time) {
-            //         commands.push_back("Courier ID: " + to_string(courier.id) + " (" + courier.fio + ")" +
-            //         " must to go client ID: " + to_string(client.id) + " (" + client.fio + ")");
-            //         courier.x = client.x;
-            //         courier.y = client.y;
-            //         // controller.updateCoordsCourier(courier.id, client.x, client.y);
-            //         erase_if(timeArrival, [&](const Processing &p) { return p.client.id == client.id; });
-            //         break;
-            //     }
-            //     localTime = t;
-            // }
-            t++;
-        } else break;
+vector<string> AlgorithmDijkstras::process(SQLController& controller) {
+    vector<string> commands;
+    while (!_clients.empty()) {
+        auto timeArrival = calculate(_couriers, _clients);
+
+        ranges::sort(timeArrival, [](const Processing& a, const Processing& b) {
+            return a.time + a.courier.finalTime > b.time + b.courier.finalTime;
+        });
+        for (int i = 0; i < _couriers.size(); i++) {
+            if (_clients.empty() || timeArrival.empty())
+                break;
+            auto [courier, client, time] = timeArrival.back();
+            courier.finalTime += time;
+            courier.x = client.x;
+            courier.y = client.y;
+            commands.emplace_back(generateCommand(courier, client));
+            erase_if(_clients, [&](const Client &c) { return c.id == client.id; });
+            erase_if(timeArrival, [&](const Processing &p) { return p.client.id == client.id; });
+            erase_if(timeArrival, [&](const Processing &p) { return p.courier.id == courier.id; });
+        }
     }
-    // for (int iter = 0; iter < timeArrival.size(); iter++) {
-    //     if (!timeArrival.empty()) {
-    //
-    //
-    //         for (auto &[courier, client, time, status] : timeArrival) {
-    //             if (status) {
-    //                 commands.push_back("Courier ID: " + to_string(courier.id) + " (" + courier.fio + ")" +
-    //                 "  must to go client ID: " + to_string(client.id) + " (" + client.fio + ")");
-    //                 controller.updateCoordsCourier(courier.id, client.x, client.y);
-    //                 erase_if(timeArrival, [&](const Processing &p) { return p.client.id == client.id; });
-    //                 status = false;
-    //                 break;
-    //             }
-    //         }
-    //     } else break;
-    // }
 
     return commands;
 }

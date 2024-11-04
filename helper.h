@@ -11,4 +11,6 @@ std::pair<bool, string> checkPhoneNumber(const string&);
 
 double distance(const pair<int, int>&, const pair<int, int>&);
 
+class WeightIsNull final : public exception{};
+
 #endif //HELPER_H

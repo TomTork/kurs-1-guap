@@ -30,11 +30,20 @@ struct Courier {
     int y;
     string transport;
     int speed;
+    double finalTime = 0;
+    double localTime = 0;
 };
 
 struct SimpleId {
     int id;
     string fio;
+};
+
+struct Warehouse {
+    int id;
+    string name;
+    int x;
+    int y;
 };
 
 class SQLController final {
@@ -104,6 +113,12 @@ public:
      * @return Courier[]
      */
     vector<Courier> getDataCouriers();
+
+    /**
+     * Вернуть массив Складов
+     * @return Warehouse[]
+     */
+    vector<Warehouse> getDataWarehouses();
 
     /**
      * Удалить все данные из таблиц

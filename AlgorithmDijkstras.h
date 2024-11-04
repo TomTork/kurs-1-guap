@@ -6,10 +6,9 @@
 using namespace std;
 
 struct Processing {
-    Courier* courier{};
-    Client* client{};
+    Courier courier;
+    Client client;
     double time = 0;
-    double localTime = 0;
 };
 
 class AlgorithmDijkstras {
@@ -21,6 +20,10 @@ private:
      * Компаратор для сортировки
      */
     static bool compareByTime(const Processing&, const Processing&);
+
+    static vector<Processing> calculate(const vector<Courier>&, const vector<Client>&);
+
+    static string generateCommand(const Courier&, const Client&);
 public:
     /**
      * Основной алгоритм Дейкстры
