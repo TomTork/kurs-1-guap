@@ -37,7 +37,6 @@ pair<bool, string> checkStringState(const string &state, const bool allowSpace =
 }
 
 pair<bool, string> checkPhoneNumber(const string &num) {
-    // 89177732814
     if ((num.length() == 12 && num[0] == '+') || (num.length() == 11)) {
         for (const auto& el : num) {
             if (!isdigit(el)) return pair { false, "" };

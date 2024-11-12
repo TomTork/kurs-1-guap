@@ -1,7 +1,6 @@
 #include "AlgorithmDijkstras.h"
 #include <algorithm>
 #include <iostream>
-#include <cmath>
 #include "helper.h"
 
 using namespace std;
