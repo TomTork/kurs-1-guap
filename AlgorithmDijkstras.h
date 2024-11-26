@@ -32,7 +32,7 @@ public:
      */
     AlgorithmDijkstras(const vector<Client>& clients, const vector<Courier>& couriers) : _clients(clients), _couriers(couriers){}
 
-    vector<string> process(SQLController&);
+    vector<string> process();
 };
 
 #endif //ALGORITHMDIJKSTRAS_H

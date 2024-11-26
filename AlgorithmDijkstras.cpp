@@ -34,7 +34,7 @@ string AlgorithmDijkstras::generateCommand(const Courier& courier, const Client&
     + to_string(client.id) + " (" + client.fio + ") with Time: " + to_string(courier.finalTime);
 }
 
-vector<string> AlgorithmDijkstras::process(SQLController& controller) {
+vector<string> AlgorithmDijkstras::process() {
     vector<string> commands;
     while (!_clients.empty()) {
         auto timeArrival = calculate(_couriers, _clients);

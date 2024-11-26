@@ -247,7 +247,7 @@ int main() {
                     break;
                 case 6: // Optimize
                     cout << endl;
-                    commands = AlgorithmDijkstras(controller.getClientsWithOrders(), controller.getDataCouriers()).process(controller);
+                    commands = AlgorithmDijkstras(controller.getClientsWithOrders(), controller.getDataCouriers()).process();
                     for (const auto& com : commands) {
                         cout << com << endl;
                     }
