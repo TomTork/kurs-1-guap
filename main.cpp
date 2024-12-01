@@ -19,6 +19,7 @@ int main() {
     Warehouse warehouse;
     string command, _num, _fio, _location, _transport, _speed, orders;
     int _x, _y, finalSpeed, weight;
+    string inputWeight;
     bool choiceOrder, choiceWarehouse;
     const vector<string> options = {
         "Output all couriers", "Output all clients", "Output all orders",
@@ -26,7 +27,6 @@ int main() {
         "Optimize", "Exit"
     };
     unsigned long long selected = 0, clientSelected = 0, warehouseSelected = 0;
-
     while (true) {
         system("cls");
 
@@ -236,7 +236,8 @@ int main() {
                         cout << "Input weight of order(s): ";
                         while (true) {
                             try {
-                                cin >> weight;
+                                cin >> inputWeight;
+                                weight = stoi(inputWeight);
                                 break;
                             } catch (exception& e) {
                                 cerr << "A non-integer number was entered. Error: " << e.what() << endl;

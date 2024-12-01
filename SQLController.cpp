@@ -8,7 +8,7 @@
 using namespace std;
 
 void SQLController::createTable() {
-    const auto createCouriers = "CREATE TABLE IF NOT EXISTS Couriers(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, x INTEGER, y INTEGER, transport TEXT, speed INTEGER);";
+    // const auto createCouriers = "CREATE TABLE IF NOT EXISTS Couriers(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, x INTEGER, y INTEGER, transport TEXT, speed INTEGER);";
     const auto createClients = "CREATE TABLE IF NOT EXISTS Clients(ID INTEGER PRIMARY KEY AUTOINCREMENT, fio TEXT, num TEXT, x INTEGER, y INTEGER);";
     const auto createOrders = "CREATE TABLE IF NOT EXISTS Orders(ID INTEGER PRIMARY KEY AUTOINCREMENT, client_id INTEGER, orders TEXT, status BOOLEAN, weight INTEGER, FOREIGN KEY (client_id) REFERENCES Clients (ID) ON DELETE CASCADE);";
     const auto createWarehouses = "CREATE TABLE IF NOT EXISTS Warehouses(ID INTEGER PRIMARY KEY, name TEXT, x INTEGER, y INTEGER);"
@@ -16,10 +16,10 @@ void SQLController::createTable() {
                                   "INSERT INTO Warehouses VALUES(2, \"The warehouse of the Kyrortny district\", 20, 20);"
                                   "INSERT INTO Warehouses VALUES(3, \"The warehouse of the Vyborgsky district\", 12, 7);"
                                   "INSERT INTO Warehouses VALUES(4, \"The warehouse of the Kirovsky district\", 5, 2);";
-    if (this->exit = sqlite3_exec(this->db, createCouriers, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
-        cerr << "ERROR ::createTable " << this->err << endl;
-        sqlite3_free(this->err);
-    }
+    // if (this->exit = sqlite3_exec(this->db, createCouriers, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
+    //     cerr << "ERROR ::createTable " << this->err << endl;
+    //     sqlite3_free(this->err);
+    // }
     if (this->exit = sqlite3_exec(this->db, createClients, nullptr, nullptr, &this->err); this->exit != SQLITE_OK) {
         cerr << "ERROR ::createTable " << this->err << endl;
         sqlite3_free(this->err);
